@@ -18,7 +18,6 @@ function przygotowanie_planszy {
 }
 
 function wyswietl_plansze {
-	clear	
 	for((x=0;x<3;x++)) do
 		for((y=0;y<3;y++)) do
 			echo -n ${PLANSZA[$x,$y]}
@@ -74,6 +73,7 @@ function wprowadz_wspolrzedne {
 	done
 	INPUTBOOLEAN=0
 	let ILOSC=ILOSC+1;
+	zapisz_gre
 }
 
 function sprawdz_czy_wygrana {
@@ -99,25 +99,115 @@ function sprawdz_czy_wygrana {
 			fi
 		fi
 
+
 }
 
 function gra {
+	clear
+	echo 'Witaj w grze kółko i krzyżyk'
+	sleep 1
+	echo 'Gra posiada automatyczny zapis gry co każdą runde'
+	sleep 2
+	echo 'Jesli przerwiersz rozgrywke bedziesz mogl do niej wrocic'
+	sleep 2
+	if [ -e ./save/zapisGry.txt ]; then
+		wybor='t';
+		while [ $wybor != 'y' -a $wybor != 'n' ]; do
+			echo 'Wykryto niedokonczona rozgrywke czy chcesz ja dokonczyc? [y/n]'
+			read wybor
+		done
+		if [ $wybor = 'y' ]; then
+			echo 'Ladowanie poprzedniej rozgrywki'
+			ladowanie_poprzedniej_rozgrywki
+			rozpocznij_gre
+		else
+			echo 'Rozgrywka zostanie nadpisana przez nowa obecna'
+			sleep 2
+			nowa_gra
+		fi
+	else
+		nowa_gra	
+	fi
+}
+
+function ladowanie_poprzedniej_rozgrywki {
+
+	ZMIENNA=()
+	k=0;
+	for i in `cat ./save/zapisGry.txt`
+	do
+		echo 'cos robie'
+		ZMIENNA[$k]=$i
+		k=$(($k+1));
+	done
+	echo ${ZMIENNA[*]}
+
+GRACZ=${ZMIENNA[0]}
+ILOSC=${ZMIENNA[1]}
+cc=2
+for ((x=0;x<3;x++)) do
+	for((y=0;y<3;y++)) do
+	PLANSZA[$x,$y]=${ZMIENNA[$cc]}
+	cc=$(($cc+1))
+done
+done
+}
+function nowa_gra {
+	przygotuj_katalog_save
 	przygotowanie_planszy
 #Losowy start gracza
 	GRACZ=$((1 + $RANDOM %2))
+	rozpocznij_gre
+}
+
+function rozpocznij_gre {
+	clear
 	while [ $KONIEC = 0 ]; do
-		wyswietl_plansze
+		clear
 		echo 'Kolejka GRACZ:' $GRACZ
+		wyswietl_plansze
 		if [ $ILOSC -le 8 ]; then
 			wprowadz_wspolrzedne
 		else
 			echo 'REMIS'
 			KONIEC=1;
+			zapisz_gre
 		fi
-
 	done
 	echo 'Dziekujemy za gre'
 
 }
+
+
+function przygotuj_katalog_save {
+	if [ ! -d ./save ]; then
+		mkdir ./save
+	elif [ -e ./save/zapisGry.txt ]; then
+		rm ./save/zapisGry.txt
+	fi
+}
+
+function zapisz_gre {
+	if [ $KONIEC = 0 ]; then
+
+	if [ -e ./save/zapisGry.txt ]; then
+		rm ./save/zapisGry.txt
+	fi
+	touch ./save/zapisGry.txt
+	echo $GRACZ | tee -a  ./save/zapisGry.txt
+	 echo $ILOSC | tee -a  ./save/zapisGry.txt
+	
+	for ((x=0;x<3;x++)) do
+		for ((y=0;y<3;y++)) do
+			 echo ${PLANSZA[$x,$y]} | tee -a  ./save/zapisGry.txt
+		done
+	done
+else
+	if [ -e ./save/zapisGry.txt ]; then
+		rm ./save/zapisGry.txt
+	fi
+fi
+}
+
 
 gra
