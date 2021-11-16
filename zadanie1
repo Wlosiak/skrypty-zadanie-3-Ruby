@@ -1,137 +1,122 @@
 #!/bin/bash
 
+#Dawid
 
 declare -A PLANSZA
 
-KOMPUTER=0
-LEVEL=0
 KONIEC=0
 ILOSC=0
-INPUTVALUE=0
+INPUTBOOLEAN=0
 GRACZ=1
 
-function przygotowanie {
-	for((i=0;i<3;i++)) do
-		for((j=0;j<3;j++)) do
-			PLANSZA[$i,$j]=0
+function przygotowanie_planszy {
+	for((x=0;x<3;x++)) do
+		for((y=0;y<3;y++)) do
+			PLANSZA[$x,$y]=0
 		done
 	done
 }
 
-
-
-
-function wyswietl {
-clear	
-for((i=0;i<3;i++)) do
-	for((j=0;j<3;j++)) do
-		echo -n ${PLANSZA[$i,$j]}
-	done
-	echo ''
-done
-}
-
-function sprawdzDaneWejsciowe {
-if [[ $@ -le -1 || $@ -ge 3 ]]; then
-
-echo 'Podałeś zla wspolrzedna z poza zakresu'
-INPUTVALUE=0
-else
-INPUTVALUE=1
-fi
-}
-
-function sprawdzCzyZajete {
-if [ ${PLANSZA[$@]} = 0 ]; then
-	INPUTVALUE=1
-	if [ $GRACZ = 1 ]; then
-		PLANSZA[$@]=1
-		sprawdzWygrana
-		GRACZ=2
-	else
-		PLANSZA[$@]=2
-		sprawdzWygrana
-		GRACZ=1
-	fi
-else
-	clear
-	wyswietl
-	echo 'Wybrane pole jest juz zajete'
-	INPUTVALUE=0;
-fi
-
-
-}
-
-function podajWartosc {
-
-
-while [ $INPUTVALUE = 0 ]; do	
-
-while [ $INPUTVALUE = 0 ]; do
-
-echo 'Podaj pierwsza współrzedna od 0 do 2'
-read x
-sprawdzDaneWejsciowe $x
-done
-INPUTVALUE=0
-while [ $INPUTVALUE = 0 ]; do
-echo 'Podaj druga współrzedna od 0 do 2'
-read y
-sprawdzDaneWejsciowe $y
-done
-INPUTVALUE=0
-sprawdzCzyZajete $x,$y
-done
-INPUTVALUE=0
-let ILOSC=ILOSC+1;
-}
-
-function sprawdzWygrana {
-#sprawdzanie wierszy i kolumn
-wyswietl
+function wyswietl_plansze {
+	clear	
 	for((x=0;x<3;x++)) do
+		for((y=0;y<3;y++)) do
+			echo -n ${PLANSZA[$x,$y]}
+		done
+		echo ''
+	done
+}
 
-		if [ ${PLANSZA[$x,0]} = $GRACZ ] && [ ${PLANSZA[$x,0]} = ${PLANSZA[$x,1]} ] && [ ${PLANSZA[$x,0]} = ${PLANSZA[$x,2]} ]; then
-			echo 'WYGRANA GRACZA:'$GRACZ
-			KONIEC=1;
-		elif [ ${PLANSZA[0,$x]} = $GRACZ ] && [ ${PLANSZA[0,$x]} = ${PLANSZA[1,$x]} ] && [ ${PLANSZA[0,$x]} = ${PLANSZA[2,$x]} ]; then
-			echo 'WYGRANA GRACZ:' $GRACZ
-			KONIEC=1;
+function sprawdz_dane_wejsciowe {
+	if [[ $@ -le -1 || $@ -ge 3 ]]; then
+		echo 'Podałeś zla wspolrzedna z poza zakresu'
+		INPUTBOOLEAN=0
+	else
+		INPUTBOOLEAN=1
+	fi
+}
+
+function procesuj_wspolrzedne {
+	if [ ${PLANSZA[$@]} = 0 ]; then
+		INPUTBOOLEAN=1
+		if [ $GRACZ = 1 ]; then
+			PLANSZA[$@]=1
+			sprawdz_czy_wygrana
+			GRACZ=2
+		else
+			PLANSZA[$@]=2
+			sprawdz_czy_wygrana
+			GRACZ=1
 		fi
+	else
+		clear
+		wyswietl_plansze
+		echo 'Wybrane pole jest juz zajete'
+		INPUTBOOLEAN=0;
+	fi
+}
+
+function wprowadz_wspolrzedne {
+	while [ $INPUTBOOLEAN = 0 ]; do	
+		while [ $INPUTBOOLEAN = 0 ]; do
+			echo 'Podaj pierwsza współrzedna od 0 do 2'
+			read x
+			sprawdz_dane_wejsciowe $x
+		done
+		INPUTBOOLEAN=0
+		while [ $INPUTBOOLEAN = 0 ]; do
+			echo 'Podaj druga współrzedna od 0 do 2'
+			read y
+			sprawdz_dane_wejsciowe $y
+		done
+		INPUTBOOLEAN=0
+		procesuj_wspolrzedne $x,$y
+	done
+	INPUTBOOLEAN=0
+	let ILOSC=ILOSC+1;
+}
+
+function sprawdz_czy_wygrana {
+#sprawdzanie wierszy i kolumn
+	wyswietl_plansze
+		for((x=0;x<3;x++)) do
+			if [ ${PLANSZA[$x,0]} = $GRACZ ] && [ ${PLANSZA[$x,0]} = ${PLANSZA[$x,1]} ] && [ ${PLANSZA[$x,0]} = ${PLANSZA[$x,2]} ]; then
+				echo 'WYGRANA GRACZA:'$GRACZ
+				KONIEC=1;
+			elif [ ${PLANSZA[0,$x]} = $GRACZ ] && [ ${PLANSZA[0,$x]} = ${PLANSZA[1,$x]} ] && [ ${PLANSZA[0,$x]} = ${PLANSZA[2,$x]} ]; then
+				echo 'WYGRANA GRACZ:' $GRACZ
+				KONIEC=1;
+			fi
 		done
 #SKOSY
-	
-	if [ ${PLANSZA[1,1]} = $GRACZ ]; then	
-		
-		if [ ${PLANSZA[1,1]} = ${PLANSZA[0,0]} ] && [ ${PLANSZA[1,1]} = ${PLANSZA[2,2]} ]; then
-			echo 'WYGRANA PO SKOSIE GRACZA:'$GRACZ
-			KONIEC=1;	
-		elif [ ${PLANSZA[1,1]} = ${PLANSZA[2,0]} ] && [ ${PLANSZA[1,1]} = ${PLANSZA[0,2]} ]; then
-                        echo 'WYGRANA PO SKOSIE GRACZA:'$GGRACZ
-			KONIEC=1;
+		if [ ${PLANSZA[1,1]} = $GRACZ ]; then	
+			if [ ${PLANSZA[1,1]} = ${PLANSZA[0,0]} ] && [ ${PLANSZA[1,1]} = ${PLANSZA[2,2]} ]; then
+				echo 'WYGRANA PO SKOSIE GRACZA:'$GRACZ
+				KONIEC=1;	
+			elif [ ${PLANSZA[1,1]} = ${PLANSZA[2,0]} ] && [ ${PLANSZA[1,1]} = ${PLANSZA[0,2]} ]; then
+				echo 'WYGRANA PO SKOSIE GRACZA:'$GRACZ
+				KONIEC=1;
+			fi
 		fi
-	fi
 
 }
 
 function gra {
-przygotowanie
-GRACZ=$((1 + $RANDOM %2))
-while [ $KONIEC = 0 ]; do
-wyswietl
-echo 'Kolejka GRACZ:' $GRACZ
-	if [ $ILOSC -le 8 ]; then
-	podajWartosc
+	przygotowanie_planszy
+#Losowy start gracza
+	GRACZ=$((1 + $RANDOM %2))
+	while [ $KONIEC = 0 ]; do
+		wyswietl_plansze
+		echo 'Kolejka GRACZ:' $GRACZ
+		if [ $ILOSC -le 8 ]; then
+			wprowadz_wspolrzedne
+		else
+			echo 'REMIS'
+			KONIEC=1;
+		fi
 
-	else
-		echo 'REMIS'
-		KONIEC=1;
-	fi
-
-
-done
-echo 'Dziekujemy za gre'
+	done
+	echo 'Dziekujemy za gre'
 
 }
 
