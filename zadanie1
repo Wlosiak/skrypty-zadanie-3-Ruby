@@ -58,13 +58,13 @@ function procesuj_wspolrzedne {
 function wprowadz_wspolrzedne {
 	while [ $INPUTBOOLEAN = 0 ]; do	
 		while [ $INPUTBOOLEAN = 0 ]; do
-			echo 'Podaj pierwsza współrzedna od 0 do 2'
+			echo 'Podaj pierwsza współrzedna(wiersz) od 0 do 2 '
 			read x
 			sprawdz_dane_wejsciowe $x
 		done
 		INPUTBOOLEAN=0
 		while [ $INPUTBOOLEAN = 0 ]; do
-			echo 'Podaj druga współrzedna od 0 do 2'
+			echo 'Podaj druga współrzedna(kolumna) od 0 do 2'
 			read y
 			sprawdz_dane_wejsciowe $y
 		done
